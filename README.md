@@ -1,2 +1,3 @@
-IPMI Used for Server Project which have BMC chip, it's a Intel protocal to control the Server. 
-Archiving some of the IPMI Standard command and OEM commnad that you can used by select the GUI mode to send IPMI command. 
+1. IPMI Used for Server Project which have BMC chip, it's a Intel protocal to control the Server. 
+2. Archiving some of the IPMI Standard command and OEM commnad that you can used by select the GUI mode to send IPMI command. 
+3. Periodical to update the new IPMI command code. 
