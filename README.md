@@ -25,5 +25,4 @@
      20. Set Watchdog Timer (raw 0x06 0x24)
  6. ***************AMI Command********************
      21. Fan Control (raw 0x3c 0x42 0x01 0x00 0x%)
-     22. Flash FRU        
- 7. ***************AMI Command******************** 
+     22. Flash FRU 
