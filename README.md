@@ -1,10 +1,9 @@
 1. IPMI Used for Server Project which have BMC chip, it's Intel protocal to control the Server.
 2. Archiving some of the IPMI Standard command and OEM commnad that you can used by select the GUI mode to send IPMI command. 
 3. Periodical to update the new IPMI command code. 
-4. 
-  *******************Common**********************
-        1.  Get IP Address and MAC Address
-        
+4.  
+   *******************Common**********************
+        1.  Get IP Address and MAC Address      
    *************Standard Command******************
         2   Set Lan Configuration Parameters
         3.  Get Device ID (raw 06 01)
