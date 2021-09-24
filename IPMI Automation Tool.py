@@ -5,6 +5,8 @@ Created on Tue Aug 24 20:30:25 2021
 @author: David & Dennis
 """
 import os, re
+import time
+currenttime = time.strftime('%Y-%m-%d %H-%M-%S', time.localtime())
 
 Note = """
    *******************Common**********************
@@ -34,33 +36,92 @@ Note = """
         21. Fan Control (raw 0x3c 0x42 0x01 0x00 0x%)
         22. Flash FRU
         
-   ***************AMI Command********************    
+   ******************Stress**********************
+        23. IPMI Cycle Stress (Warm Boot)
+           
         """
+#------------------------------------ Function ------------------------------------------#
+
+def execCmd(cmd):
+    r = os.popen(cmd)
+    text = r.read()
+    r.close()
+    return text
+
+def get_ipaddress_mac():
+    cmd = "ipconfig /all"
+    result = execCmd(cmd)
+    pat1 = re.compile(r"實體位址[\. ]+: ([\w-]+)")
+    pat2 = re.compile(r"IPv4 位址[\. ]+: ([\.\d]+)")
+    MAC = re.findall(pat1, result)[0] # 找到MAC
+    IP = re.findall(pat2, result)[0] # 找到IP
+    print("MAC=%s, IP=%s" %(MAC, IP))
+
+def sel_check():
+    try:
+        cmd = "ipmitool.exe -I lanplus -U"+BMCID+" -P "+BMCPW+ " -H "+BMCIP+ " sel list"
+        result = execCmd(cmd)
+        pat1 = re.compile(r'Critical \w+')
+        errormsg = re.findall(pat1, result)[0]
+        # print("errormsg = %s" %(errormsg))
+        if errormsg != []:
+            return True
+        else:
+           return False
+            
+    except IndexError:
+        print("\n Sel check : Sel list not have Critical error \n")
+      
+def oslinkcheck(osip):     
+    try:
+        pingip = "ping " + osip 
+        result = execCmd(pingip)
+        pat1 = re.compile(r"TTL")
+        link = re.findall(pat1, result)[0] 
+        print("OS boot Ready !")
+        check = True
+          
+    except IndexError:
+        check = False
+        print("OS booting.....")
+          
+    return check
+
+def bmclinkcheck(bmcip):     
+    try:
+        bmcip = "ipmitool.exe -I lanplus -U"+BMCID+" -P "+BMCPW+ " -H "+BMCIP+ " chassis status" 
+        result = execCmd(bmcip)
+        pat1 = re.compile(r"System Power")
+        link = re.findall(pat1, result)[0] 
+        print("\n BMC Connecting !")
+        check = True
+          
+    except IndexError:
+        check = False
+        print("\n BMC Connect fail")
+        exit() 
+    return check
+
+
+
+def exportTxt(cmdresult, username):
+    with open(username + ".txt","w") as f:
+      f.write(cmdresult)
+      
+#------------------------------------ Function ------------------------------------------#
+
 
 BMCIP = str(input("請輸入BMCIP: \n"))
 BMCID = str(input("請輸入BMC User ID: \n"))
 BMCPW = str(input("請輸入BMC PW: \n"))
 
+bmclinkcheck(BMCIP)
 
 while 1==1:
   
   num = int(input(Note + "\n" + "Input: "))
-  
-  def execCmd(cmd):
-      r = os.popen(cmd)
-      text = r.read()
-      r.close()
-      return text
 
-  def get_ipaddress_mac():
-      cmd = "ipconfig /all"
-      result = execCmd(cmd)
-      pat1 = re.compile(r"實體位址[\. ]+: ([\w-]+)")
-      pat2 = re.compile(r"IPv4 位址[\. ]+: ([\.\d]+)")
-      MAC = re.findall(pat1, result)[0] # 找到MAC
-      IP = re.findall(pat2, result)[0] # 找到IP
-      print("MAC=%s, IP=%s" %(MAC, IP))
-      
+        
 #------------------------------------Standard Command------------------------------------------#
   def set_BMCIP_address():
       StatusNote = """
@@ -241,7 +302,41 @@ while 1==1:
       print("Flash successfully, BMC is cold resetting now...") 
       cold_reset()
 
-#------------------------------------AMI Command------------------------------------------#      
+#------------------------------------AMI Command------------------------------------------#
+#------------------------------------- Stress --------------------------------------------#
+
+  def ipmi_power_cycle():
+      cycle = int(input("請輸入Cycle圈數: "))
+      osip = str(input("請輸入OS IP: "))
+      osdelay = int(input("請輸入 OS Delay 時間: "))
+      for i in range(1, cycle+1):
+        
+          checkresult = oslinkcheck(osip)
+          # time.sleep(osdelay)
+          sel_check()       
+              
+          checkresult = False
+          checkpoint = 0
+          
+          while checkresult == False:
+            while 1==1:                
+                checkresult = oslinkcheck(osip)
+                if checkresult == True:
+                    checkpoint += 1
+                if checkpoint == osdelay:
+                    break
+
+          cmd = "ipmitool.exe -I lanplus -U"+BMCID+" -P "+BMCPW+ " -H "+BMCIP+ " sel list"
+          result = execCmd(cmd)
+          
+          powercycle = "ipmitool.exe -I lanplus -U"+BMCID+" -P "+BMCPW+ " -H "+BMCIP+ " chassis power cycle"
+          execCmd(powercycle)
+
+          print("第" + str(i) + "圈")
+          
+          exportTxt(result, "IPMI_Power_Cycle " + currenttime)
+      
+#------------------------------------- Stress --------------------------------------------#       
 
   if __name__ == '__main__':
     
@@ -310,3 +405,8 @@ while 1==1:
 
       if num == 22:
           flash_FRU()
+
+      if num == 23:
+          ipmi_power_cycle()
+
+          
