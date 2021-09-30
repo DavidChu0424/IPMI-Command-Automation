@@ -6,7 +6,6 @@ Created on Tue Aug 24 20:30:25 2021
 """
 import os, re
 import time
-currenttime = time.strftime('%Y-%m-%d %H-%M-%S', time.localtime())
 
 Note = """
    *******************Common**********************
@@ -59,11 +58,14 @@ def get_ipaddress_mac():
 
 def sel_check():
     try:
-        cmd = "ipmitool.exe -I lanplus -U"+BMCID+" -P "+BMCPW+ " -H "+BMCIP+ " sel list"
+        cmd = "ipmitool.exe -I lanplus -U "+BMCID+" -P "+BMCPW+ " -H "+BMCIP+ " sel list"
         result = execCmd(cmd)
-        pat1 = re.compile(r'Critical \w+')
-        errormsg = re.findall(pat1, result)[0]
-        # print("errormsg = %s" %(errormsg))
+        pat1 = re.compile(r'Critical \W*\w*\W*\w*\W*\w*\W*\w*\w*\s*\w*\W*\w*')
+        errormsg = re.findall(pat1, result)
+        pat2 = re.compile(r'\w*\s*\w*\W*\w*\W*\w* failure \W*\w*')
+        failmsg = re.findall(pat2, result)
+        print("errormsg = %s \nfailmsg = %s" %(errormsg,failmsg))
+        
         if errormsg != []:
             return True
         else:
@@ -89,7 +91,7 @@ def oslinkcheck(osip):
 
 def bmclinkcheck(bmcip):     
     try:
-        bmcip = "ipmitool.exe -I lanplus -U"+BMCID+" -P "+BMCPW+ " -H "+BMCIP+ " chassis status" 
+        bmcip = "ipmitool.exe -I lanplus -U "+BMCID+" -P "+BMCPW+ " -H "+BMCIP+ " chassis status" 
         result = execCmd(bmcip)
         pat1 = re.compile(r"System Power")
         link = re.findall(pat1, result)[0] 
@@ -118,7 +120,8 @@ BMCPW = str(input("請輸入BMC PW: \n"))
 bmclinkcheck(BMCIP)
 
 while 1==1:
-  
+    
+  currenttime = time.strftime('%Y-%m-%d %H-%M-%S', time.localtime())
   num = int(input(Note + "\n" + "Input: "))
 
         
@@ -134,7 +137,7 @@ while 1==1:
            channel = str(input("請輸入 Channel Number (1 or 2): " + "\n"))
            print("input: " + channel , "\n")
            newip = str(input("請輸入 New IP: " + "\n"))
-           cmd = "ipmitool.exe -I lanplus -U"+BMCID+" -P "+BMCPW+ " -H "+BMCIP + " lan set " + channel + " ipaddr " + newip
+           cmd = "ipmitool.exe -I lanplus -U "+BMCID+" -P "+BMCPW+ " -H "+BMCIP + " lan set " + channel + " ipaddr " + newip
            result = execCmd(cmd)
            print("\n" + " Please Reconnect the BMC !!!")
            
@@ -143,32 +146,32 @@ while 1==1:
            channel = str(input("請輸入 Channel Number (1 or 2): " + "\n"))
            print("input: ", channel ,"\n")
            newmask = str(input("請輸入 New Mask: " + "\n"))
-           cmd = "ipmitool.exe -I lanplus -U"+BMCID+" -P "+BMCPW+ " -H "+ BMCIP + " lan set " + channel + " netmask " + newmask
+           cmd = "ipmitool.exe -I lanplus -U "+BMCID+" -P "+BMCPW+ " -H "+ BMCIP + " lan set " + channel + " netmask " + newmask
            result = execCmd(cmd)
            
            
   def get_device_id():
-      cmd = "ipmitool.exe -I lanplus -U"+BMCID+" -P "+BMCPW+ " -H "+BMCIP+ " raw 06 01"
+      cmd = "ipmitool.exe -I lanplus -U "+BMCID+" -P "+BMCPW+ " -H "+BMCIP+ " raw 06 01"
       result = execCmd(cmd)
       print("response: \n\n" + result)
 
   def cold_reset():
-      cmd = "ipmitool.exe -I lanplus -U"+BMCID+" -P "+BMCPW+ " -H "+BMCIP+ " raw 06 02"
+      cmd = "ipmitool.exe -I lanplus -U "+BMCID+" -P "+BMCPW+ " -H "+BMCIP+ " raw 06 02"
       result = execCmd(cmd)
       print("response: \n\n" + result)
 
   def get_self_test_result():
-      cmd = "ipmitool.exe -I lanplus -U"+BMCID+" -P "+BMCPW+ " -H "+BMCIP+ " raw 06 04"
+      cmd = "ipmitool.exe -I lanplus -U "+BMCID+" -P "+BMCPW+ " -H "+BMCIP+ " raw 06 04"
       result = execCmd(cmd)
       print("response: \n\n" + result)     
 
   def get_ACPI_Power_State():
-      cmd = "ipmitool.exe -I lanplus -U"+BMCID+" -P "+BMCPW+ " -H "+BMCIP+ " raw 06 07"
+      cmd = "ipmitool.exe -I lanplus -U "+BMCID+" -P "+BMCPW+ " -H "+BMCIP+ " raw 06 07"
       result = execCmd(cmd)
       print("response: \n\n" + result) 
 
   def get_Chassis_Status():
-      cmd = "ipmitool.exe -I lanplus -U"+BMCID+" -P "+BMCPW+ " -H "+BMCIP+ " chassis status"
+      cmd = "ipmitool.exe -I lanplus -U "+BMCID+" -P "+BMCPW+ " -H "+BMCIP+ " chassis status"
       result = execCmd(cmd)
       print("response: \n\n" + result)
 
@@ -183,84 +186,84 @@ while 1==1:
       select = int(input(StatusNote + "\n"))
 
       if select == 1:
-           cmd = "ipmitool.exe -I lanplus -U"+BMCID+" -P "+BMCPW+ " -H "+BMCIP+ " chassis power on"
+           cmd = "ipmitool.exe -I lanplus -U "+BMCID+" -P "+BMCPW+ " -H "+BMCIP+ " chassis power on"
            result = execCmd(cmd)
            print("response: \n\n" + result)
            
       if select == 2:
-           cmd = "ipmitool.exe -I lanplus -U"+BMCID+" -P "+BMCPW+ " -H "+BMCIP+ " chassis power off"
+           cmd = "ipmitool.exe -I lanplus -U "+BMCID+" -P "+BMCPW+ " -H "+BMCIP+ " chassis power off"
            result = execCmd(cmd)
            print("response : \n\n" + result)
 
       if select == 3:
-           cmd = "ipmitool.exe -I lanplus -U"+BMCID+" -P "+BMCPW+ " -H "+BMCIP+ " chassis power cycle"
+           cmd = "ipmitool.exe -I lanplus -U "+BMCID+" -P "+BMCPW+ " -H "+BMCIP+ " chassis power cycle"
            result = execCmd(cmd)
            print("response: \n\n" + result)
 
       if select == 4:
-           cmd = "ipmitool.exe -I lanplus -U"+BMCID+" -P "+BMCPW+ " -H "+BMCIP+ " chassis power reset"
+           cmd = "ipmitool.exe -I lanplus -U "+BMCID+" -P "+BMCPW+ " -H "+BMCIP+ " chassis power reset"
            result = execCmd(cmd)
            print("response: \n\n" + result)
 
       if select == 5:
-           cmd = "ipmitool.exe -I lanplus -U"+BMCID+" -P "+BMCPW+ " -H "+BMCIP+ " chassis power diag"
+           cmd = "ipmitool.exe -I lanplus -U "+BMCID+" -P "+BMCPW+ " -H "+BMCIP+ " chassis power diag"
            result = execCmd(cmd)
            print("response: \n\n" + result)
 
   def get_sel_elist():
-      cmd = "ipmitool.exe -I lanplus -U"+BMCID+" -P "+BMCPW+ " -H "+BMCIP+ " sel elist"
+      cmd = "ipmitool.exe -I lanplus -U "+BMCID+" -P "+BMCPW+ " -H "+BMCIP+ " sel elist"
       result = execCmd(cmd)
       print("response: \n\n" + result)
 
   def sel_clear():
-      cmd = "ipmitool.exe -I lanplus -U"+BMCID+" -P "+BMCPW+ " -H "+BMCIP+ " sel clear"
+      cmd = "ipmitool.exe -I lanplus -U "+BMCID+" -P "+BMCPW+ " -H "+BMCIP+ " sel clear"
       result = execCmd(cmd)
       print("response: \n\n" + result)
 
   def get_Device_GUID():
-      cmd = "ipmitool.exe -I lanplus -U"+BMCID+" -P "+BMCPW+ " -H "+BMCIP+ " raw 0x06 0x08"
+      cmd = "ipmitool.exe -I lanplus -U "+BMCID+" -P "+BMCPW+ " -H "+BMCIP+ " raw 0x06 0x08"
       result = execCmd(cmd)
       print("response: \n\n" + result) 
       
   def get_sensor_list():
-      cmd = "ipmitool.exe -I lanplus -U"+BMCID+" -P "+BMCPW+ " -H "+BMCIP+ " sensor list"
+      cmd = "ipmitool.exe -I lanplus -U "+BMCID+" -P "+BMCPW+ " -H "+BMCIP+ " sensor list"
       result = execCmd(cmd)
       print("response: \n\n" + result) 
 
   def get_sdr_elist():
-      cmd = "ipmitool.exe -I lanplus -U"+BMCID+" -P "+BMCPW+ " -H "+BMCIP+ " sdr elist"
+      cmd = "ipmitool.exe -I lanplus -U "+BMCID+" -P "+BMCPW+ " -H "+BMCIP+ " sdr elist"
       result = execCmd(cmd)
       print("response: \n\n" + result)
 
   def get_bmc_Global_Enables():
-      cmd = "ipmitool.exe -I lanplus -U"+BMCID+" -P "+BMCPW+ " -H "+BMCIP+ " raw 0x06 0x2f"
+      cmd = "ipmitool.exe -I lanplus -U "+BMCID+" -P "+BMCPW+ " -H "+BMCIP+ " raw 0x06 0x2f"
       result = execCmd(cmd)
       print("response: \n\n" + result)
 
   def get_POH():
-      cmd = "ipmitool.exe -I lanplus -U"+BMCID+" -P "+BMCPW+ " -H "+BMCIP+ " raw 0x00 0x0f"
+      cmd = "ipmitool.exe -I lanplus -U "+BMCID+" -P "+BMCPW+ " -H "+BMCIP+ " raw 0x00 0x0f"
       result = execCmd(cmd)
       print("response: \n\n" + result)
 
   def get_Sensor_Reading():
       sensornumber = str(input("請輸入 Sensor Number: "))
-      cmd = "ipmitool.exe -I lanplus -U"+BMCID+" -P "+BMCPW+ " -H "+BMCIP+ " raw 0x04 0x2d 0x" + sensornumber
+      cmd = "ipmitool.exe -I lanplus -U "+BMCID+" -P "+BMCPW+ " -H "+BMCIP+ " raw 0x04 0x2d 0x" + sensornumber
       result = execCmd(cmd)
       print("response: \n\n" + result)
 
   def get_Sensor_Event():
       sensorevent = str(input("請輸入 Sensor Number: "))
-      cmd = "ipmitool.exe -I lanplus -U"+BMCID+" -P "+BMCPW+ " -H "+BMCIP+ " raw 0x04 0x2b 0x" + sensornumber
+      cmd = "ipmitool.exe -I lanplus -U "+BMCID+" -P "+BMCPW+ " -H "+BMCIP+ " raw 0x04 0x2b 0x" + sensornumber
       result = execCmd(cmd)
       print("response: \n\n" + result) 
 
   def get_Watchdog_timer():
-      cmd = "ipmitool.exe -I lanplus -U"+BMCID+" -P "+BMCPW+ " -H "+BMCIP+ " raw 0x06 0x25"
+      cmd = "ipmitool.exe -I lanplus -U "+BMCID+" -P "+BMCPW+ " -H "+BMCIP+ " raw 0x06 0x25"
       result = execCmd(cmd)
       print("response: \n\n" + result)
 
   def reset_Watchdog_timer():
-      cmd = "ipmitool.exe -I lanplus -U"+BMCID+" -P "+BMCPW+ " -H "+BMCIP+ " raw 0x06 0x22"
+      cmd = "ipmitool.exe -I lanplus -U "+BMCID+" -P "+BMCPW+ " -H "+BMCIP+ " raw 0x06 0x22"
       result = execCmd(cmd)
       print("response: \n\n" + result + "Reset Successfully")    
 
@@ -273,7 +276,7 @@ while 1==1:
       byte5 = str(input("Byte5: "))
       byte6 = str(input("Byte6: "))
       print("\n\n")
-      cmd = "ipmitool.exe -I lanplus -U"+BMCID+" -P "+BMCPW+ " -H "+BMCIP+ " raw 0x06 0x24 " + "0x" + byte1 + " 0x" + byte2 + " 0x" + byte3 + " 0x" + byte4 + " 0x" + byte5 + " 0x" + byte6
+      cmd = "ipmitool.exe -I lanplus -U "+BMCID+" -P "+BMCPW+ " -H "+BMCIP+ " raw 0x06 0x24 " + "0x" + byte1 + " 0x" + byte2 + " 0x" + byte3 + " 0x" + byte4 + " 0x" + byte5 + " 0x" + byte6
       result = execCmd(cmd)
       print("response: \n\n" + result)
 
@@ -282,21 +285,21 @@ while 1==1:
   def fan_speed_control():
       speedrateinput = int(input("請輸入想要的風扇轉速 0~100%: "))
       speedrate = hex(speedrateinput)
-      cmd = "ipmitool.exe -I lanplus -U"+BMCID+" -P "+BMCPW+ " -H "+BMCIP+ " raw 0x3c 0x42 0x01 0x00 "+speedrate
+      cmd = "ipmitool.exe -I lanplus -U "+BMCID+" -P "+BMCPW+ " -H "+BMCIP+ " raw 0x3c 0x42 0x01 0x00 "+speedrate
       result = execCmd(cmd)
       print("response: \n\n" + result)
       print("風扇轉速已調整為" + str(speedrateinput) + "%")
 
   def flash_FRU():
       FRU_name = str(input("請輸入FRU名稱: "))
-      cmd_unlock = "ipmitool.exe -I lanplus -U"+BMCID+" -P "+BMCPW+ " -H "+BMCIP+ " raw 0x06 0x05 0x00"
+      cmd_unlock = "ipmitool.exe -I lanplus -U "+BMCID+" -P "+BMCPW+ " -H "+BMCIP+ " raw 0x06 0x05 0x00"
       execCmd(cmd_unlock)
 
       print("SUT start to flash FRU now...") 
       cmd_flash = "frugen_win64.exe -t FRU -i 0 -r "+FRU_name+" -R -U "+BMCID+" -P "+BMCPW+ " -H "+BMCIP
       execCmd(cmd_flash)
       
-      cmd_lock = "ipmitool.exe -I lanplus -U"+BMCID+" -P "+BMCPW+ " -H "+BMCIP+ " raw 0x06 0x05 0x01"
+      cmd_lock = "ipmitool.exe -I lanplus -U "+BMCID+" -P "+BMCPW+ " -H "+BMCIP+ " raw 0x06 0x05 0x01"
       execCmd(cmd_lock)
 
       print("Flash successfully, BMC is cold resetting now...") 
@@ -310,14 +313,22 @@ while 1==1:
       osip = str(input("請輸入OS IP: "))
       osdelay = int(input("請輸入 OS Delay 時間: "))
       for i in range(1, cycle+1):
-        
+                  
           checkresult = oslinkcheck(osip)
           # time.sleep(osdelay)
           sel_check()       
-              
+                
+          print("第" + str(i) + "圈")
+          
+          cmd = "ipmitool.exe -I lanplus -U "+BMCID+" -P "+BMCPW+ " -H "+BMCIP+ " sel list"
+          result = execCmd(cmd)
+          
+          powercycle = "ipmitool.exe -I lanplus -U "+BMCID+" -P "+BMCPW+ " -H "+BMCIP+ " chassis power cycle"
+          execCmd(powercycle)
+
           checkresult = False
           checkpoint = 0
-          
+
           while checkresult == False:
             while 1==1:                
                 checkresult = oslinkcheck(osip)
@@ -325,15 +336,7 @@ while 1==1:
                     checkpoint += 1
                 if checkpoint == osdelay:
                     break
-
-          cmd = "ipmitool.exe -I lanplus -U"+BMCID+" -P "+BMCPW+ " -H "+BMCIP+ " sel list"
-          result = execCmd(cmd)
-          
-          powercycle = "ipmitool.exe -I lanplus -U"+BMCID+" -P "+BMCPW+ " -H "+BMCIP+ " chassis power cycle"
-          execCmd(powercycle)
-
-          print("第" + str(i) + "圈")
-          
+                
           exportTxt(result, "IPMI_Power_Cycle " + currenttime)
       
 #------------------------------------- Stress --------------------------------------------#       
@@ -408,5 +411,4 @@ while 1==1:
 
       if num == 23:
           ipmi_power_cycle()
-
           
