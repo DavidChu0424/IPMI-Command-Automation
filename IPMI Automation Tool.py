@@ -119,7 +119,7 @@ BMCPW = str(input("請輸入BMC PW: \n"))
 
 bmclinkcheck(BMCIP)
 
-while 1==1:
+while 1:
     
   currenttime = time.strftime('%Y-%m-%d %H-%M-%S', time.localtime())
   num = int(input(Note + "\n" + "Input: "))
