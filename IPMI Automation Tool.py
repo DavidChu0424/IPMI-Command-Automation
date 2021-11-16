@@ -2,40 +2,41 @@
 """
 Created on Tue Aug 24 20:30:25 2021
 
-@author: David & Dennis
+@author: David
 """
 import os, re
 import time
 
 Note = """
-   *******************Common**********************
-        1.  Get IP Address and MAC Address
         
    *************Standard Command******************
-        2   Set Lan Configuration Parameters
-        3.  Get Device ID (raw 06 01)
-        4.  BMC Cold Reset (raw 06 02)
-        5.  Get Self Test Result (raw 06 04)
-        6.  Get ACPI Power State (raw 06 07)
-        7.  Get Chassis Status
-        8.  Set Chassis Status
-        9.  BMC Sel elist
-        10. BMC Sel clear
-        11. Get Device GUID (raw 06 08)
-        12. Get Sensor list
-        13. Get SDR elist
-        14. Get_BMC_Global_Status
-        15. Get POH Counter (raw 0x00 0x0f)
-        16. Get Sensor Reading (raw 0x04 0x2d 0x SensorNumber)
-        17. Get Sensor Event (raw 0x04 0x2b 0x SensorNumber)
-        18. Get Watchdog Timer (raw 0x06 0x25)
-        19. Reset Watchdog Timer (raw 0x06 0x22)
-        20. Set Watchdog Timer (raw 0x06 0x24)
-   ***************AMI Command********************
-        21. Fan Control (raw 0x3c 0x42 0x01 0x00 0x%)
-        22. Flash FRU
+        1   Set Lan Configuration Parameters
+        2.  Get Device ID (raw 06 01)
+        3.  BMC Cold Reset (raw 06 02)
+        4.  Get Self Test Result (raw 06 04)
+        5.  Get ACPI Power State (raw 06 07)
+        6.  Get Chassis Status
+        7.  Set Chassis Status
+        8.  BMC Sel elist
+        9. BMC Sel clear
+        10. Get Device GUID (raw 06 08)
+        11. Get Sensor list
+        12. Get SDR elist
+        13. Get_BMC_Global_Status
+        14. Get POH Counter (raw 0x00 0x0f)
+        15. Get Sensor Reading (raw 0x04 0x2d 0x SensorNumber)
+        16. Get Sensor Event (raw 0x04 0x2b 0x SensorNumber)
+        17. Get Watchdog Timer (raw 0x06 0x25)
+        18. Reset Watchdog Timer (raw 0x06 0x22)
+        19. Set Watchdog Timer (raw 0x06 0x24)
+   ***************AMI OEM Command********************
+        20. Fan Control (raw 0x3c 0x42 0x01 0x00 0x%)
+        21. Flash FRU
         
-   ******************Stress**********************
+   ***************Dell OEM Command********************
+        22. Fan Control (raw 0x30 0x30 0x02 0xff 0x%)
+
+   ******************Stress***************************
         23. IPMI Cycle Stress (Warm Boot)
            
         """
@@ -306,6 +307,17 @@ while 1:
       cold_reset()
 
 #------------------------------------AMI Command------------------------------------------#
+
+   def dell_fan_speed_control():
+      speedrateinput = int(input("請輸入想要的風扇轉速 0~100%: "))
+      speedrate = hex(speedrateinput)
+      cmd = "ipmitool.exe -I lanplus -U "+BMCID+" -P "+BMCPW+ " -H "+BMCIP+ " raw 0x30 0x30 0x02 0xff "+speedrate
+      result = execCmd(cmd)
+      print("response: \n\n" + result)
+      print("風扇轉速已調整為" + str(speedrateinput) + "%")
+
+
+      
 #------------------------------------- Stress --------------------------------------------#
 
   def ipmi_power_cycle():
@@ -342,73 +354,76 @@ while 1:
 #------------------------------------- Stress --------------------------------------------#       
 
   if __name__ == '__main__':
-    
-      if num == 1:
-          get_ipaddress_mac()
 
-      if num == 2:
+      if num == 1:
           set_BMCIP_address()
 
-      if num == 3:
+      if num == 2:
           get_device_id()
 
-      if num == 4:
+      if num == 3:
           cold_reset()
 
-      if num == 5:
+      if num == 4:
           get_self_test_result()
 
-      if num == 6:
+      if num == 5:
           get_ACPI_Power_State()
 
-      if num == 7:
+      if num == 6:
           get_Chassis_Status()
 
-      if num == 8:
+      if num == 7:
           set_Chassi_Status()
 
-      if num == 9:
+      if num == 8:
           get_sel_elist()
 
-      if num == 10:
+      if num == 9:
           sel_clear()
 
-      if num == 11:
+      if num == 10:
           get_Device_GUID()
 
-      if num == 12:
+      if num == 11:
           get_sensor_list()
 
-      if num == 13:
+      if num == 12:
           get_sdr_elist()
           
-      if num == 14:
+      if num == 13:
           get_bmc_Global_Enables()
 
-      if num == 15:
+      if num == 14:
           get_POH()
 
-      if num == 16:
+      if num == 15:
           get_Sensor_Reading()
 
-      if num == 17:
+      if num == 16:
           get_Sensor_Event()
 
-      if num == 18:
+      if num == 17:
           get_Watchdog_timer()
 
-      if num == 19:
+      if num == 18:
           reset_Watchdog_timer()
 
-      if num == 20:
+      if num == 19:
           set_Watchdog_timer()
           
-      if num == 21:
+      if num == 20:
           fan_speed_control()
 
-      if num == 22:
+      if num == 21:
           flash_FRU()
+
+      if num == 22:
+          dell_fan_speed_control()
 
       if num == 23:
           ipmi_power_cycle()
+
+      if num == 24:
+          sel_check()
           
