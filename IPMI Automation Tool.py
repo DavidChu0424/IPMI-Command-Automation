@@ -308,7 +308,7 @@ while 1:
 
 #------------------------------------AMI Command------------------------------------------#
 
-   def dell_fan_speed_control():
+  def dell_fan_speed_control():
       speedrateinput = int(input("請輸入想要的風扇轉速 0~100%: "))
       speedrate = hex(speedrateinput)
       cmd = "ipmitool.exe -I lanplus -U "+BMCID+" -P "+BMCPW+ " -H "+BMCIP+ " raw 0x30 0x30 0x02 0xff "+speedrate
