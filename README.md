@@ -3,7 +3,7 @@
 3. It's default used by IPMI 2.0.
 4. Periodical to update the new IPMI command code. 
 5. Used Step
-     - Determine the BMC has been connected and IPMI finction has been enabled. 
+     - Determine the BMC has been connected and IPMI finction enabled. 
      - Launch the "IPMI Automation Tool.py" by CMD.
      - Insert the BMC IP / BMC UserID/ BMC Password
      - Choose the IPMI command which you want to used. 
